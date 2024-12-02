@@ -2,11 +2,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+//main run for all schedulers
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Welcome to the CPU Scheduler!");
+        System.out.println("\nWelcome to the CPU Scheduler!");
         System.out.println("Select a Scheduling Algorithm:");
         System.out.println("1. Shortest Job First (SJF)");
         System.out.println("2. Shortest Remaining Time First (SRTF)");
@@ -49,15 +50,17 @@ public class Main {
                 break;
             case 2:
                 System.out.println("\nRunning Shortest Remaining Time First (SRTF) Scheduling...");
+
+                srtfSchedule(processes);
                 break;
             case 3:
                 System.out.println("\nRunning Priority Scheduling...");
                 break;
             case 4:
                 System.out.println("\nRunning FCAI Scheduling...");
-                double V1 = processes.stream().mapToInt(p -> p.arrivalTime).max().orElse(1) / 10.0;
-                double V2 = processes.stream().mapToInt(p -> p.burstTime).max().orElse(1) / 10.0;
-                List<String> executionOrder = FCAIScheduler.scheduleFCAI(processes, contextSwitching, V1, V2);
+                double V1 = processes.getLast().getArrivalTime() / 10.0; //bahseb v1
+                double V2 = processes.stream().mapToInt(Process::getBurstTime).max().orElse(1) / 10.0; //bahseb v2
+                List<String> executionOrder = FCAIScheduler.scheduleFCAI(processes, contextSwitching, V1, V2); //ba-pass elqueue ely 3amalto le class el FCAIScheduler
                 FCAIScheduler.displayResults(processes, executionOrder);
                 break;
             default:
