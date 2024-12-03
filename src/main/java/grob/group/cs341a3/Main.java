@@ -1,8 +1,9 @@
+package grob.group.cs341a3;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-//main run for all schedulers
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -49,25 +50,29 @@ public class Main {
             processes.add(new Process(name, arrivalTime, burstTime, priority, quantum));
         }
 
+        System.out.print("Do you want a graphical representation of the scheduling (Y/N)? ");
+        String graphChoice = scanner.next();
+
+        // Pass the graph choice to the algorithm
+        boolean graphRequired = graphChoice.equalsIgnoreCase("Y");
+
         switch (choice) {
             case 1:
                 System.out.println("\nRunning Shortest Job First (SJF) Scheduling...");
                 break;
             case 2:
                 System.out.println("\nRunning Shortest Remaining Time First (SRTF) Scheduling...");
-<<<<<<< Updated upstream
-
-//                srtfSchedule(processes);
-=======
-                SRTF.srtfSchedule(processes);
->>>>>>> Stashed changes
+                if (graphRequired) {
+                    SRTF.runWithGraph(processes);
+                } else {
+                    SRTF.srtfSchedule(processes);
+                }
                 break;
             case 3:
                 System.out.println("\nRunning Priority Scheduling...");
                 break;
             case 4:
                 System.out.println("\nRunning FCAI Scheduling...");
-                FCAIScheduler.fcaiSchedule(processes, contextSwitching);
                 break;
             default:
                 System.out.println("Invalid choice! Please run the program again.");
