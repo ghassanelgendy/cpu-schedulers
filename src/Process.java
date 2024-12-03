@@ -14,6 +14,10 @@ class Process {
     private int waitingTime;
     private int turnaroundTime;
     private final List<Integer> quantumHistory;
+    private int startTime = -1; // Initialized to -1 to indicate not started
+    private int endTime;
+    private int completionTime;
+    private int responseTime;
 
     public Process(String name, int arrivalTime, int burstTime, int priority, int quantum) {
         this.name = name;
@@ -24,9 +28,13 @@ class Process {
         this.quantum = quantum;
         this.quantumHistory = new ArrayList<>();
         this.quantumHistory.add(quantum);
+
     }
 
     // Getters and Setters
+    public int getStartTime() { return startTime; }
+    public int getCompletionTime() { return completionTime; }
+    public int getResponseTime() { return responseTime; }
     public String getName() { return name; }
     public int getArrivalTime() { return arrivalTime; }
     public int getBurstTime() { return burstTime; }
@@ -35,10 +43,14 @@ class Process {
     public int getQuantum() { return quantum; }
     public int getWaitingTime() { return waitingTime; }
     public void setWaitingTime(int waitingTime) { this.waitingTime = waitingTime; }
+
     public int getTurnaroundTime() { return turnaroundTime; }
     public void setTurnaroundTime(int turnaroundTime) { this.turnaroundTime = turnaroundTime; }
     public List<Integer> getQuantumHistory() { return quantumHistory; }
-
+    public void setRemainingTime(int remainingTime) { this.remainingTime = remainingTime; }
+    public void setStartTime(int startTime) { this.startTime = startTime; }
+    public void setCompletionTime(int completionTime) { this.completionTime = completionTime; }
+    public void setResponseTime(int responseTime) { this.responseTime = responseTime; }
     public int updateFcaiFactor(double V1, double V2) {
         return (int) ceil((10 - priority) + (arrivalTime / V1) + (remainingTime / V2));
     }

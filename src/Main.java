@@ -37,10 +37,15 @@ public class Main {
             }
             System.out.print(" - Arrival Time: ");
             int arrivalTime = scanner.nextInt();
-            System.out.print(" - Priority Number: ");
-            int priority = scanner.nextInt();
-            System.out.print(" - Initial Quantum (for FCAI only): ");
-            int quantum = scanner.nextInt();
+            int quantum = 0;
+            int priority = 0;
+            if (choice == 4){
+                System.out.print(" - Priority Number: ");
+                priority = scanner.nextInt();
+                System.out.print(" - Initial Quantum (for FCAI only): ");
+                quantum = scanner.nextInt();
+            }
+
             processes.add(new Process(name, arrivalTime, burstTime, priority, quantum));
         }
 
@@ -50,8 +55,12 @@ public class Main {
                 break;
             case 2:
                 System.out.println("\nRunning Shortest Remaining Time First (SRTF) Scheduling...");
+<<<<<<< Updated upstream
 
 //                srtfSchedule(processes);
+=======
+                SRTF.srtfSchedule(processes);
+>>>>>>> Stashed changes
                 break;
             case 3:
                 System.out.println("\nRunning Priority Scheduling...");
