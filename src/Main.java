@@ -51,17 +51,14 @@ public class Main {
             case 2:
                 System.out.println("\nRunning Shortest Remaining Time First (SRTF) Scheduling...");
 
-                srtfSchedule(processes);
+//                srtfSchedule(processes);
                 break;
             case 3:
                 System.out.println("\nRunning Priority Scheduling...");
                 break;
             case 4:
                 System.out.println("\nRunning FCAI Scheduling...");
-                double V1 = processes.getLast().getArrivalTime() / 10.0; //bahseb v1
-                double V2 = processes.stream().mapToInt(Process::getBurstTime).max().orElse(1) / 10.0; //bahseb v2
-                List<String> executionOrder = FCAIScheduler.scheduleFCAI(processes, contextSwitching, V1, V2); //ba-pass elqueue ely 3amalto le class el FCAIScheduler
-                FCAIScheduler.displayResults(processes, executionOrder);
+                FCAIScheduler.fcaiSchedule(processes, contextSwitching);
                 break;
             default:
                 System.out.println("Invalid choice! Please run the program again.");
