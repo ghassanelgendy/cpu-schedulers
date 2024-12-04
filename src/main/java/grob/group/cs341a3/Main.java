@@ -1,5 +1,7 @@
 package grob.group.cs341a3;
 
+import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -30,6 +32,8 @@ public class Main {
             System.out.println("Process " + (i + 1) + ":");
             System.out.print(" - Name: ");
             String name = scanner.next();
+            System.out.print(" - Color: ");
+            Color c = Color.valueOf(scanner.next());
             System.out.print(" - Burst Time: ");
             int burstTime = scanner.nextInt();
             if (burstTime <= 0) {
@@ -51,7 +55,8 @@ public class Main {
                 }
             }
             //elobject nafso
-            processes.add(new Process(name, arrivalTime, burstTime, priority, quantum));
+            System.out.println(c);
+            processes.add(new Process(name, arrivalTime, burstTime, priority, quantum,c));
         }
 
         switch (choice) {
@@ -60,6 +65,7 @@ public class Main {
                 SJF.schedule(processes.size(), processes, contextSwitching);
                 break;
             case 2:
+
                 System.out.println("\nRunning Shortest Remaining Time First (SRTF) Scheduling...");
                 SRTF.schedule(processes, contextSwitching);
                 break;

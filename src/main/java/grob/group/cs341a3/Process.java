@@ -1,9 +1,13 @@
 package grob.group.cs341a3;
+import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
 import java.util.List;
 import static java.lang.Math.ceil;
 
 class Process {
+
+    Color color;
     String name;
     int arrivalTime;
     int burstTime;
@@ -20,7 +24,7 @@ class Process {
     int responseTime;
     boolean isComplete;
 
-    public Process(String name, int arrivalTime, int burstTime, int priority, int quantum) {
+    public Process(String name, int arrivalTime, int burstTime, int priority, int quantum, Color c) {
         this.name = name;
         this.arrivalTime = arrivalTime;
         this.burstTime = burstTime;
@@ -29,36 +33,114 @@ class Process {
         this.quantum = quantum;
         this.quantumHistory = new ArrayList<>();
         this.quantumHistory.add(quantum);
+        this.color = c;
 
 
     }
 
-    // Getters and Setters
-    public void decrementRemainingTime(){remainingTime--;}
-    public void setCompleted(boolean haa){isComplete = haa;}
-    public void setEndTime(int t){endTime = t;}
-    public int getStartTime() { return startTime; }
-    public void setPriority(int p){priority = p;}
-    public int getPriority(){return priority;}
-    public int getCompletionTime() { return completionTime; }
-    public int getResponseTime() { return responseTime; }
-    public String getName() { return name; }
-    public int getArrivalTime() { return arrivalTime; }
-    public int getBurstTime() { return burstTime; }
-    public int getRemainingTime() { return remainingTime; }
-    public void setFcaiFactor(double fcaiFactor) { this.fcaiFactor = fcaiFactor; }
-    public int getQuantum() { return quantum; }
-    public int getWaitingTime() { return waitingTime; }
-    public void setWaitingTime(int waitingTime) { this.waitingTime = waitingTime; }
-    public int getEndTime() { return endTime; }
+    public int getEffectiveRemainingTime(int currentTime, int agingFactor) {
+        int waitingTime = currentTime - arrivalTime;
+        int agingAdjustment = waitingTime / agingFactor;
+        return Math.max(remainingTime - agingAdjustment, 0); // Effective time cannot go below 0
+    }
 
-    public int getTurnaroundTime() { return turnaroundTime; }
-    public void setTurnaroundTime(int turnaroundTime) { this.turnaroundTime = turnaroundTime; }
-    public List<Integer> getQuantumHistory() { return quantumHistory; }
-    public void setRemainingTime(int remainingTime) { this.remainingTime = remainingTime; }
-    public void setStartTime(int startTime) { this.startTime = startTime; }
-    public void setCompletionTime(int completionTime) { this.completionTime = completionTime; }
-    public void setResponseTime(int responseTime) { this.responseTime = responseTime; }
+    // Getters and Setters
+    public void decrementRemainingTime() {
+        remainingTime--;
+    }
+
+    public void setCompleted(boolean haa) {
+        isComplete = haa;
+    }
+
+    public void setEndTime(int t) {
+        endTime = t;
+    }
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setPriority(int p) {
+        priority = p;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public int getCompletionTime() {
+        return completionTime;
+    }
+
+    public int getResponseTime() {
+        return responseTime;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public int getBurstTime() {
+        return burstTime;
+    }
+
+    public int getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setFcaiFactor(double fcaiFactor) {
+        this.fcaiFactor = fcaiFactor;
+    }
+
+    public int getQuantum() {
+        return quantum;
+    }
+
+    public int getWaitingTime() {
+        return waitingTime;
+    }
+
+    public void setWaitingTime(int waitingTime) {
+        this.waitingTime = waitingTime;
+    }
+
+    public int getEndTime() {
+        return endTime;
+    }
+
+    public int getTurnaroundTime() {
+        return turnaroundTime;
+    }
+
+    public void setTurnaroundTime(int turnaroundTime) {
+        this.turnaroundTime = turnaroundTime;
+    }
+
+    public List<Integer> getQuantumHistory() {
+        return quantumHistory;
+    }
+
+    public void setRemainingTime(int remainingTime) {
+        this.remainingTime = remainingTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setCompletionTime(int completionTime) {
+        this.completionTime = completionTime;
+    }
+
+    public void setResponseTime(int responseTime) {
+        this.responseTime = responseTime;
+    }
+
     public int updateFcaiFactor(double V1, double V2) {
         return (int) ceil((10 - priority) + (arrivalTime / V1) + (remainingTime / V2));
     }
