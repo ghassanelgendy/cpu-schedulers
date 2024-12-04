@@ -6,7 +6,7 @@ import java.util.List;
 
 class SJF {
     public static void schedule(int n, List<Process> processes, int CS) {
-
+        List<String> executionHistory = new ArrayList<>();
         int currentTime = processes.getFirst().getArrivalTime();// awl arrival time m4 0 cuz obv we start from the first process's arrival time
         List<Process> readyQueue = new ArrayList<>();
         List<Process> waitingQueue = new ArrayList<>(processes);
@@ -34,8 +34,12 @@ class SJF {
                 waitingTime += currentProcess.getWaitingTime(); // sum of waiting time
                 currentProcess.setTurnaroundTime(currentProcess.getWaitingTime() + currentProcess.getBurstTime());
                 turnaroundTime += currentProcess.getTurnaroundTime(); // sum of turnaround time
+                for (int i = 0; i < currentProcess.getBurstTime(); i++) {
+                    executionHistory.add(currentProcess.getName());
+                }
                 currentTime += currentProcess.getBurstTime();
             } else {
+                executionHistory.add(readyQueue.getFirst().getName());
                 currentTime++;
             }
         }
@@ -54,8 +58,20 @@ class SJF {
             System.out.println();
         }
 
-        System.out.println("Average waiting time: " + (double) waitingTime / n);
-        System.out.println("Average turnaround time: " + (double) turnaroundTime / n);
+        System.out.println("Average waiting time: " + (float) waitingTime / n);
+        System.out.println("Average turnaround time: " + (float) turnaroundTime / n);
 
+        float avgWT = (float) waitingTime / n;
+        float avgTAT = (float) turnaroundTime / n;
+
+        // Display execution history
+        System.out.println("\nExecution History:");
+        for (int i = 0; i < executionHistory.size(); i++) {
+            System.out.printf("Time %d: %s\n", i, executionHistory.get(i));
+        }
+
+        // Draw the CPU scheduler graph
+        CPUSchedulerGraph.draw(executionHistory, (ArrayList<Process>) processes, avgWT, avgTAT);
     }
+
 }

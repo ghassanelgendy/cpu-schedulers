@@ -9,7 +9,6 @@ module grob.group.cs341a3 {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
     requires com.fasterxml.jackson.core;
 
     opens grob.group.cs341a3 to javafx.fxml;
