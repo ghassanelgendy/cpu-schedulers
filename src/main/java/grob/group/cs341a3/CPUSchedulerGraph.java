@@ -76,7 +76,6 @@ public class CPUSchedulerGraph extends Application {
 
     private void drawGraph(GraphicsContext gc, List<String> executionHistory, ArrayList<Process> processList, float AWT, float ATAT) {
         int yOffset = 50; // Initial vertical position for the processes
-        int xOffset = 10;
         int barHeight = 40; // Height of each process bar
         int xScale = 30; // Scale for time (1 unit = 30px)
         int processYOffset = 50; // Space between process bars

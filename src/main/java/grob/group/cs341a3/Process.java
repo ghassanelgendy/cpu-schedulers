@@ -53,18 +53,6 @@ class Process {
         isComplete = haa;
     }
 
-    public void setEndTime(int t) {
-        endTime = t;
-    }
-
-    public int getStartTime() {
-        return startTime;
-    }
-
-    public void setPriority(int p) {
-        priority = p;
-    }
-
     public int getPriority() {
         return priority;
     }
@@ -91,10 +79,6 @@ class Process {
 
     public int getRemainingTime() {
         return remainingTime;
-    }
-
-    public void setFcaiFactor(double fcaiFactor) {
-        this.fcaiFactor = fcaiFactor;
     }
 
     public int getQuantum() {
@@ -129,19 +113,9 @@ class Process {
         this.remainingTime = remainingTime;
     }
 
-    public void setStartTime(int startTime) {
-        this.startTime = startTime;
-    }
-
-    public void setCompletionTime(int completionTime) {
-        this.completionTime = completionTime;
-    }
-
-    public void setResponseTime(int responseTime) {
-        this.responseTime = responseTime;
-    }
-
-    public int updateFcaiFactor(double V1, double V2) {
-        return (int) ceil((10 - priority) + (arrivalTime / V1) + (remainingTime / V2));
+    public double updateFcaiFactor(double V1, double V2) {
+        System.out.println("FCAI Factor for " + name + ": " + (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2)));
+        fcaiFactor =  (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2));
+        return fcaiFactor;
     }
 }

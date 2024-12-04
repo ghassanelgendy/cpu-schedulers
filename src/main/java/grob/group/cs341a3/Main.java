@@ -75,7 +75,7 @@ public class Main {
                 break;
             case 4:
                 System.out.println("\nRunning FCAI Scheduling...");
-                FCAIScheduler.fcaiSchedule(processes, contextSwitching);
+                FCAI.schedule(processes);
                 break;
             default:
                 System.out.println("Invalid choice! Please run the program again.");
