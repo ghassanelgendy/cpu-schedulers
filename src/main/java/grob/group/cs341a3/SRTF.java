@@ -1,145 +1,100 @@
 package grob.group.cs341a3;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-
 import java.util.ArrayList;
 import java.util.List;
 
+public class SRTF {
+    static final int AGING_FACTOR = 4; // aging factor for starvation
 
-public class SRTF extends Application {
-
-    private static int time = 0; // Simulation time
-    private static List<Process> processes;
-    private static List<String> executionOrder = new ArrayList<>();
-
-    public static void main(String[] args) {
-        // Create sample processes for testing
-        processes = new ArrayList<>();
-        processes.add(new Process("P1", 0, 7, 1, 1));
-        processes.add(new Process("P2", 2, 4, 1, 1));
-        processes.add(new Process("P3", 4, 1, 1, 1));
-        processes.add(new Process("P4", 5, 4, 1, 1));
-
-        launch(args); // Start JavaFX Application
+    // Method to calculate turnaround time
+    static void findTurnAroundTime(List<Process> processes) {
+        for (Process p : processes) {
+            p.setTurnaroundTime(p.getBurstTime() + p.getWaitingTime());
+        }
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-        // Create a Canvas for drawing the Gantt chart
-        Canvas canvas = new Canvas(800, 200); // Width and Height of the canvas
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+    // Method to implement SRTF with context switching and execution history
+    static void schedule(List<Process> processes, int contextSwitchingTime) {
+        int currentTime = 0; // Current time in simulation
+        int completedProcesses = 0; // Number of processes completed
+        int totalWaitingTime = 0, totalTurnaroundTime = 0;
+        Process currentProcess = null; // Process currently being executed
+        List<String> executionHistory = new ArrayList<>(); // Record of execution history
 
-        // Setup the layout for the scene
-        StackPane root = new StackPane();
-        root.getChildren().add(canvas);
-        Scene scene = new Scene(root, 800, 300);
+        System.out.println("\nProcesses " +
+                " Burst Time " +
+                " Arrival Time " +
+                " Waiting Time " +
+                " Turnaround Time");
 
-        // Timeline to run the SRTF algorithm and update the canvas every second
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            srtfSchedule();
-            plotGraph(gc); // Update the Gantt chart on each iteration
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE); // Run indefinitely
-        timeline.play();
+        while (completedProcesses < processes.size()) {
+            // Find the process with the shortest remaining time
+            Process nextProcess = null;
+            int minRemainingTime = Integer.MAX_VALUE;
 
-        // Display the JavaFX window
-        primaryStage.setTitle("SRTF Scheduling Algorithm");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    // Shortest Remaining Time First Scheduling Algorithm
-    public static void srtfSchedule() {
-        int completedProcesses = 0; // Number of completed processes
-        int totalProcesses = processes.size();
-
-        while (completedProcesses < totalProcesses) {
-            // Find the process with the shortest remaining time that is ready to execute
-            Process currentProcess = null;
-            for (Process process : processes) {
-                if (process.getArrivalTime() <= time && process.getRemainingTime() > 0) {
-                    if (currentProcess == null || process.getRemainingTime() < currentProcess.getRemainingTime()) {
-                        currentProcess = process;
-                    }
+            for (Process p : processes) {
+                if (p.getArrivalTime() <= currentTime && !p.isComplete && p.getRemainingTime() < minRemainingTime) {
+                    minRemainingTime = p.getRemainingTime();
+                    nextProcess = p;
                 }
             }
 
+            // Check if context switch is needed
+            if (nextProcess != currentProcess) {
+                if (currentProcess != null && nextProcess != null) {
+                    // Apply context switching time if there's a switch
+                    for (int i = 0; i < contextSwitchingTime; i++) {
+                        executionHistory.add("CS"); // Record context switching time
+                        currentTime++;
+                    }
+                }
+                currentProcess = nextProcess;
+            }
+
             if (currentProcess == null) {
-                // No process is ready to execute, so idle
-                executionOrder.add("-");
-                time++; // Move to the next time unit
+                // No process available, record idle time
+                executionHistory.add("Idle");
+                currentTime++;
                 continue;
             }
 
-            // Record the process's execution
-            executionOrder.add(currentProcess.getName());
-            currentProcess.setRemainingTime(currentProcess.getRemainingTime() - 1); // Execute the process for 1 time unit
+            // Execute the current process for 1 unit of time
+            executionHistory.add(currentProcess.getName());
+            currentProcess.decrementRemainingTime();
+            currentTime++;
 
-            // If the process finishes execution
+            // Check if the process is completed
             if (currentProcess.getRemainingTime() == 0) {
+                currentProcess.setCompleted(true);
                 completedProcesses++;
-                int completionTime = time + 1;
-                int turnaroundTime = completionTime - currentProcess.getArrivalTime();
-                int waitingTime = turnaroundTime - currentProcess.getBurstTime();
 
-                currentProcess.setCompletionTime(completionTime);
-                currentProcess.setTurnaroundTime(turnaroundTime);
-                currentProcess.setWaitingTime(waitingTime);
-
+                // Calculate waiting time for the completed process
+                currentProcess.setWaitingTime(currentTime - currentProcess.getBurstTime() - currentProcess.getArrivalTime());
             }
-
-            // Increment simulation time
-            time++;
-        }
-    }
-
-    // Function to plot the Gantt chart on the Canvas
-    private static void plotGraph(GraphicsContext gc) {
-        gc.clearRect(0, 0, 800, 200); // Clear the canvas
-
-        int x = 50; // Starting X position for the first process
-        int barWidth = 60; // Width of each process block
-        int height = 100; // Height of the bars
-
-        // Draw the Gantt chart (execution order)
-        for (String process : executionOrder) {
-            if (!process.equals("-")) {
-                gc.setFill(Color.LIGHTBLUE); // Color for processes
-                gc.fillRect(x, height, barWidth, 50);
-                gc.setStroke(Color.BLACK); // Border color
-                gc.strokeRect(x, height, barWidth, 50);
-
-                // Display the process name inside the block
-                gc.setFill(Color.BLACK);
-                gc.fillText(process, x + 10, height + 25);
-            } else {
-                // Draw a gap (idle time) with grey color
-                gc.setFill(Color.GRAY);
-                gc.fillRect(x, height, barWidth, 50);
-            }
-            x += barWidth; // Move X position for the next block
         }
 
-        // Update time on the X-axis
-        x = 50;
-        for (int i = 0; i < executionOrder.size(); i++) {
-            gc.setFill(Color.BLACK);
-            gc.fillText(String.valueOf(i), x + 20, height + 70); // Display time at the bottom
-            x += barWidth;
-        }
-    }
+        // Calculate turnaround time
+        findTurnAroundTime(processes);
 
-    public static void passProcesses(List<Process> processes) {
-    SRTF.processes = processes;
+        // Print process details and calculate averages
+        for (Process p : processes) {
+            totalWaitingTime += p.getWaitingTime();
+            totalTurnaroundTime += p.getTurnaroundTime();
+
+            System.out.println(" " + p.getName() + "\t\t\t"
+                    + p.getBurstTime() + "\t\t\t "
+                    + p.getArrivalTime() + "\t\t\t "
+                    + p.getWaitingTime() + "\t\t\t\t"
+                    + p.getTurnaroundTime());
+        }
+
+        System.out.println("\nAverage Waiting Time = " + (float) totalWaitingTime / processes.size());
+        System.out.println("Average Turnaround Time = " + (float) totalTurnaroundTime / processes.size());
+
+        // Print execution history
+        System.out.println("\nExecution History:");
+        for (int i = 0; i < executionHistory.size(); i++) {
+            System.out.printf("Time %d: %s\n", i, executionHistory.get(i));
+        }
     }
 }
-

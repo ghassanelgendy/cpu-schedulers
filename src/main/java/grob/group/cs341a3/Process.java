@@ -4,20 +4,21 @@ import java.util.List;
 import static java.lang.Math.ceil;
 
 class Process {
-    private String name;
-    private int arrivalTime;
-    private int burstTime;
-    private int priority;
+    String name;
+    int arrivalTime;
+    int burstTime;
+    int priority;
     int remainingTime;
-    private double fcaiFactor;
+    double fcaiFactor;
     int quantum;
-    private int waitingTime;
-    private int turnaroundTime;
-    private final List<Integer> quantumHistory;
-    private int startTime = -1; // Initialized to -1 to indicate not started
-    private int endTime;
-    private int completionTime;
-    private int responseTime;
+    int waitingTime;
+    int turnaroundTime;
+    List<Integer> quantumHistory;
+    int startTime = -1; // Initialized to -1 to indicate not started
+    int endTime;
+    int completionTime;
+    int responseTime;
+    boolean isComplete;
 
     public Process(String name, int arrivalTime, int burstTime, int priority, int quantum) {
         this.name = name;
@@ -29,10 +30,16 @@ class Process {
         this.quantumHistory = new ArrayList<>();
         this.quantumHistory.add(quantum);
 
+
     }
 
     // Getters and Setters
+    public void decrementRemainingTime(){remainingTime--;}
+    public void setCompleted(boolean haa){isComplete = haa;}
+    public void setEndTime(int t){endTime = t;}
     public int getStartTime() { return startTime; }
+    public void setPriority(int p){priority = p;}
+    public int getPriority(){return priority;}
     public int getCompletionTime() { return completionTime; }
     public int getResponseTime() { return responseTime; }
     public String getName() { return name; }
@@ -43,6 +50,7 @@ class Process {
     public int getQuantum() { return quantum; }
     public int getWaitingTime() { return waitingTime; }
     public void setWaitingTime(int waitingTime) { this.waitingTime = waitingTime; }
+    public int getEndTime() { return endTime; }
 
     public int getTurnaroundTime() { return turnaroundTime; }
     public void setTurnaroundTime(int turnaroundTime) { this.turnaroundTime = turnaroundTime; }
