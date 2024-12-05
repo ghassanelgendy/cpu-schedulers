@@ -6,7 +6,6 @@ import java.util.List;
 import static java.lang.Math.ceil;
 
 class Process {
-
     Color color;
     String name;
     int arrivalTime;
@@ -18,10 +17,7 @@ class Process {
     int waitingTime;
     int turnaroundTime;
     List<Integer> quantumHistory;
-    int startTime = -1; // Initialized to -1 to indicate not started
     int endTime;
-    int completionTime;
-    int responseTime;
     boolean isComplete;
 
     public Process(String name, int arrivalTime, int burstTime, int priority, int quantum, Color c) {
@@ -37,13 +33,6 @@ class Process {
 
 
     }
-
-    public int getEffectiveRemainingTime(int currentTime, int agingFactor) {
-        int waitingTime = currentTime - arrivalTime;
-        int agingAdjustment = waitingTime / agingFactor;
-        return Math.max(remainingTime - agingAdjustment, 0); // Effective time cannot go below 0
-    }
-
     // Getters and Setters
     public void decrementRemainingTime() {
         remainingTime--;
@@ -51,18 +40,6 @@ class Process {
 
     public void setCompleted(boolean haa) {
         isComplete = haa;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public int getCompletionTime() {
-        return completionTime;
-    }
-
-    public int getResponseTime() {
-        return responseTime;
     }
 
     public String getName() {
@@ -103,14 +80,6 @@ class Process {
 
     public void setTurnaroundTime(int turnaroundTime) {
         this.turnaroundTime = turnaroundTime;
-    }
-
-    public List<Integer> getQuantumHistory() {
-        return quantumHistory;
-    }
-
-    public void setRemainingTime(int remainingTime) {
-        this.remainingTime = remainingTime;
     }
 
     public double updateFcaiFactor(double V1, double V2) {
