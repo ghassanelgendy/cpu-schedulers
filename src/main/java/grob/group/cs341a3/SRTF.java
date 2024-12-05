@@ -1,74 +1,90 @@
-// SRTF with aging factor to handle starvation
 package grob.group.cs341a3;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SRTF {
-    static final int AGING_FACTOR = 4; // aging factor for starvation
+    static final int p_factor = 5; // Priority factor lelstarvation
+    static final int starvationThreshold = 10; // elprocess testana ad eh lehad maoul enha btestarve?
 
-    // Calculate Turnaround Time
+    // tat
     static void findTurnAroundTime(List<Process> processes) {
         for (Process p : processes) {
             p.setTurnaroundTime(p.getBurstTime() + p.getWaitingTime());
-            System.out.println("start time: " + p.startTime + "\nEnd Time: "+ p.endTime);
         }
     }
 
-    // Main Scheduler with Aging Factor
+    // Scheduler
     static void schedule(List<Process> processes, int contextSwitchingTime) {
-        int currentTime = 0; // simulation start time
-        int completedProcesses = 0; // completed processes count
+        int currentTime = 0; // Simulated clock
+        int completedProcesses = 0;
         int totalWaitingTime = 0, totalTurnaroundTime = 0;
-        Process currentProcess = null; // current running process
-        List<String> executionHistory = new ArrayList<>(); // execution history
+        Process currentProcess = null;
+        List<String> executionHistory = new ArrayList<>();
 
-        System.out.println("\nProcesses " +
-                " Burst Time " +
-                " Arrival Time " +
-                " Waiting Time " +
-                " Turnaround Time");
+        // header
+        System.out.println("\nProcesses\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time");
 
         while (completedProcesses < processes.size()) {
-
-
-
-            // Select the next process with the minimum effective remaining time
             Process nextProcess = null;
-            int minEffectiveTime = Integer.MAX_VALUE;
+            int minRemainingTime = Integer.MAX_VALUE;
+            boolean starvationOccurred = false;
 
-            // Apply aging to all waiting processes
+            // Check for starvation
             for (Process p : processes) {
-                if (p.getArrivalTime() <= currentTime && !p.isComplete && p.getEffectiveRemainingTime(currentTime, AGING_FACTOR) < minEffectiveTime) {
-                    minEffectiveTime = p.getEffectiveRemainingTime(currentTime, AGING_FACTOR);
-                    nextProcess = p;
-                }
-            }
-
-            // Handle context switching
-            if (nextProcess != currentProcess) {
-                if (currentProcess != null && nextProcess != null) {
-                    for (int i = 0; i < contextSwitchingTime; i++) {
-                        executionHistory.add("CS");
-                        currentTime++;
+                if (!p.isComplete && p.getArrivalTime() <= currentTime) { //lw elprocess makhlstsh w gya mn badry
+                    int waitingTime = currentTime - p.getArrivalTime() - (p.getBurstTime() - p.getRemainingTime()); //bahse elWT
+                    if (waitingTime > starvationThreshold) { //lw estanet aktar melthreshold yebaa de betmoot
+                        starvationOccurred = true;
+                        break;
                     }
                 }
-                currentProcess = nextProcess;
             }
 
+            // Select the next process
+            for (Process p : processes) {
+                if (p.getArrivalTime() <= currentTime && !p.isComplete) { //baswitch lelprocess elba3dha
+                    if (!starvationOccurred) {
+                        // lw mafesh starvation bashtaghal STRF 3ady
+                        if (p.getRemainingTime() < minRemainingTime) {
+                            minRemainingTime = p.getRemainingTime();
+                            nextProcess = p;
+                        }
+                    } else {
+                        // lw feh babdaa addy priority lely betmoot elawal
+                        int priority = p.getWaitingTime() * p_factor;
+                        if (p.getRemainingTime() < minRemainingTime) {
+                            minRemainingTime = p.getRemainingTime();
+                            nextProcess = p;
+                        }
+                    }
+                }
+            }
+
+            // lelCS
+            if (nextProcess != currentProcess) { //lw baswitch
+                if (currentProcess != null && nextProcess != null) { //baswitch w msh idle
+                    for (int i = 0; i < contextSwitchingTime; i++) {
+                        executionHistory.add("CS");
+                        currentTime++; //increment time
+                    }
+                }
+                currentProcess = nextProcess; //baswitch
+            }
+
+            // lw CPU Idle
             if (currentProcess == null) {
-                // Idle time if no process is available
                 executionHistory.add("Idle");
                 currentTime++;
                 continue;
             }
 
-            // Execute the selected process
+            // Execute the process
             executionHistory.add(currentProcess.getName());
             currentProcess.decrementRemainingTime();
             currentTime++;
 
-            // If the process completes, mark it as complete
+            // Mark process as complete if finished
             if (currentProcess.getRemainingTime() == 0) {
                 currentProcess.setCompleted(true);
                 completedProcesses++;
@@ -76,34 +92,27 @@ public class SRTF {
             }
         }
 
-        // Calculate Turnaround Times
+        // Calculate and display stats
         findTurnAroundTime(processes);
-
-        // Calculate averages and display process stats
-        float avgWT = 0, avgTAT = 0;
         for (Process p : processes) {
             totalWaitingTime += p.getWaitingTime();
             totalTurnaroundTime += p.getTurnaroundTime();
-
-            System.out.println(" " + p.getName() + "\t\t\t"
-                    + p.getBurstTime() + "\t\t\t "
-                    + p.getArrivalTime() + "\t\t\t "
-                    + p.getWaitingTime() + "\t\t\t\t"
-                    + p.getTurnaroundTime());
+            System.out.println(p.getName() + "\t\t\t" + p.getBurstTime() + "\t\t\t" + p.getArrivalTime()
+                    + "\t\t\t" + p.getWaitingTime() + "\t\t\t" + p.getTurnaroundTime());
         }
-        avgWT = (float) totalWaitingTime / processes.size();
-        avgTAT = (float) totalTurnaroundTime / processes.size();
+        //elavgs
+        float avgWT = (float) totalWaitingTime / processes.size();
+        float avgTAT = (float) totalTurnaroundTime / processes.size();
 
         System.out.println("\nAverage Waiting Time = " + avgWT);
         System.out.println("Average Turnaround Time = " + avgTAT);
 
-        // Display execution history
         System.out.println("\nExecution History:");
         for (int i = 0; i < executionHistory.size(); i++) {
             System.out.printf("Time %d: %s\n", i, executionHistory.get(i));
         }
 
-        // Draw the CPU scheduler graph
+        // graph be class CPUScheduler
         CPUSchedulerGraph.draw(executionHistory, (ArrayList<Process>) processes, avgWT, avgTAT);
     }
 }
