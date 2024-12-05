@@ -55,7 +55,6 @@ public class Main {
                 }
             }
             //elobject nafso
-            System.out.println(c);
             processes.add(new Process(name, arrivalTime, burstTime, priority, quantum,c));
         }
 
