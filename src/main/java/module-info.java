@@ -10,6 +10,7 @@ module grob.group.cs341a3 {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.fasterxml.jackson.core;
+    requires annotations;
 
     opens grob.group.cs341a3 to javafx.fxml;
     exports grob.group.cs341a3;

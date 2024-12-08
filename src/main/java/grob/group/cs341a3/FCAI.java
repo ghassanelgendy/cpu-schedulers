@@ -1,91 +1,118 @@
 package grob.group.cs341a3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 public class FCAI {
     public static void schedule(List<Process> processes) {
-        // Calculate V1 and V2
-        double v1 = calculateV1(processes);
-        double v2 = calculateV2(processes);
+        List<String> executionHistory = new ArrayList<>();
+        Queue<Process> readyQueue = new LinkedList<>();
+        int time = 0;
+        double V1 = processes.stream().mapToInt(Process::getArrivalTime).max().orElse(1) / 10.0;
+        double V2 = processes.stream().mapToInt(Process::getBurstTime).max().orElse(1) / 10.0;
 
-        // Initialize ready queue (sorted by FCAI factor)
-        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingDouble(p -> p.updateFcaiFactor(v1, v2)));
-        List<String> executionHistory = new ArrayList<>(); // Execution history tracker
-        Map<String, Process> allProcesses = new HashMap<>();
-        processes.forEach(p -> allProcesses.put(p.name, p));
+        int totalWaitingTime = 0, totalTurnaroundTime = 0;
 
-        int currentTime = 0;
-        while (!processes.isEmpty() || !readyQueue.isEmpty()) {
-            // Add newly arrived processes to the ready queue
-            for (Iterator<Process> it = processes.iterator(); it.hasNext(); ) {
-                Process p = it.next();
-                if (p.arrivalTime <= currentTime) {
-                    p.updateFcaiFactor(v1, v2);
+        //bnrmy el process fel ready queue awl ma ygy wa2to
+        while (processes.stream().anyMatch(p -> !p.isComplete) || !readyQueue.isEmpty()) {
+            for (Process p : processes) {
+                if (p.getArrivalTime() == time && !readyQueue.contains(p) && !p.isComplete) {
                     readyQueue.add(p);
-                    it.remove();
                 }
             }
 
-            if (!readyQueue.isEmpty()) {
-                Process current = readyQueue.poll();
-                int executionTime = Math.min(current.quantum, current.remainingTime);
+            //law mafeesh haga bn5lyh idle
+            if (readyQueue.isEmpty()) {
+                executionHistory.add("idle");
+                time++;
+                continue;
+            }
 
-                // Execute process and update current time
-                for (int t = 0; t < executionTime; t++) {
-                    executionHistory.add(current.name);
-                }
-                currentTime += executionTime;
-                current.remainingTime -= executionTime;
+            // b-update el FCAI factors w n-sort el ready queue
+            for (Process p : readyQueue) {
+                p.updateFcaiFactor(V1, V2);
+            }
+            readyQueue = new LinkedList<>(readyQueue.stream()
+                    .sorted((p1, p2) -> {
+                        if (p1.fcaiFactor != p2.fcaiFactor) {
+                            return Double.compare(p1.fcaiFactor, p2.fcaiFactor);
+                        }
+                        return Integer.compare(p1.getArrivalTime(), p2.getArrivalTime());
+                    })
+                    .toList());
 
-                // Check if the process is completed
-                if (current.remainingTime == 0) {
-                    current.turnaroundTime = currentTime - current.arrivalTime;
-                    current.waitingTime = current.turnaroundTime - current.burstTime;
-                } else {
-                    // Preemption or continuation
-                    if (executionTime >= (0.4 * current.quantum)) {
-                        current.quantum += executionTime < current.quantum
-                                ? current.quantum - executionTime
-                                : 2; // Adjust quantum
+            Process currentProcess = readyQueue.poll(); //awl process fel ready queue
+            int quantum = currentProcess.getQuantum();
+            int quantum40 = (int) Math.ceil(quantum * 0.4);
+            boolean preempted = false;
+
+            for (int i = 0; i < quantum; i++) {
+                executionHistory.add(currentProcess.getName());
+                currentProcess.decrementRemainingTime();
+                time++; //bzawed el clock
+
+
+                for (Process p : processes) {
+                    if (p.getArrivalTime() == time && !readyQueue.contains(p) && !p.isComplete) {
+                        readyQueue.add(p); //law process gdeeda wslt
                     }
-                    current.updateFcaiFactor(v1, v2);
-                    readyQueue.add(current);
                 }
-            } else {
-                // No process ready to execute, increment time
-                executionHistory.add("Idle");
-                currentTime++;
+
+                // bashoof law 3dt 40% men el quantum
+                if (i >= quantum40) {
+                    for (Process p : readyQueue) {
+                        if (!p.isComplete && p.updateFcaiFactor(V1, V2) < currentProcess.updateFcaiFactor(V1, V2)) {
+                            //law fy process el fcai factor bta3ha a2al mn el process ely 3ndy
+                            currentProcess.updateQuantum(quantum - i); // Update unused quantum
+                            readyQueue.add(currentProcess);
+                            preempted = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (preempted || currentProcess.getRemainingTime() == 0) {
+                    break;
+                }
+            }
+
+            //law process 5lst hat ely b3daha
+            if (currentProcess.getRemainingTime() == 0) {
+                currentProcess.setCompleted(true);
+                currentProcess.setTurnaroundTime(time - currentProcess.getArrivalTime());
+                currentProcess.setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getBurstTime());
+                totalWaitingTime += currentProcess.getWaitingTime();
+                totalTurnaroundTime += currentProcess.getTurnaroundTime();
+            } else if (!preempted) {
+                currentProcess.updateQuantum(0); // Add 2 to quantum
+                readyQueue.add(currentProcess);
             }
         }
 
-        // Display results
-        displayResults(allProcesses.values(), executionHistory);
-    }
 
-    private static double calculateV1(List<Process> processes) {
-        return processes.stream().mapToInt(p -> p.arrivalTime).max().orElse(1);
-    }
+        double avgWT = totalWaitingTime / (double) processes.size();
+        double avgTAT = totalTurnaroundTime / (double) processes.size();
 
-    private static double calculateV2(List<Process> processes) {
-        return processes.stream().mapToInt(p -> p.burstTime).max().orElse(1);
-    }
-
-    private static void displayResults(Collection<Process> processes, List<String> executionHistory) {
-        System.out.println("\nProcesses " +
-                " Burst Time " +
-                " Arrival Time " +
-                " Waiting Time " +
-                " Turnaround Time");
-
-        for (Process process : processes) {
-            System.out.printf("%-10s %-12d %-12d %-12d %-14d\n",
-                    process.name, process.burstTime, process.arrivalTime,
-                    process.waitingTime, process.turnaroundTime);
-        }
 
         System.out.println("\nExecution History:");
         for (int i = 0; i < executionHistory.size(); i++) {
             System.out.printf("Time %d: %s\n", i, executionHistory.get(i));
         }
+
+        System.out.println("\nProcess Details:");
+        for (Process p : processes) {
+            System.out.printf("Process %s:\n", p.getName());
+            System.out.printf(" - Waiting Time: %d\n", p.getWaitingTime());
+            System.out.printf(" - Turnaround Time: %d\n", p.getTurnaroundTime());
+            System.out.println(" - Quantum History: " + p.quantumHistory);
+        }
+
+        System.out.printf("\nAverage Waiting Time: %.2f\n", avgWT);
+        System.out.printf("Average Turnaround Time: %.2f\n", avgTAT);
+
+        // Draw graph
+        CPUSchedulerGraph.draw(executionHistory, (ArrayList<Process>) processes, (float) avgWT,(float) avgTAT);
     }
 }

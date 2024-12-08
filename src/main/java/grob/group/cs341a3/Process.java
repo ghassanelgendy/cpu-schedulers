@@ -18,6 +18,7 @@ class Process {
     int turnaroundTime;
     List<Integer> quantumHistory;
     int endTime;
+    int remainingQuantum;
     boolean isComplete;
 
     public Process(String name, int arrivalTime, int burstTime, int priority, int quantum, Color c) {
@@ -87,4 +88,14 @@ class Process {
         fcaiFactor =  (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2));
         return fcaiFactor;
     }
+
+    public void updateQuantum(int newQuantum) {
+        if (remainingQuantum == 0) {
+            quantum = quantum + 2;
+        } else {
+            quantum = quantum + remainingQuantum;
+        }
+        quantumHistory.add(quantum);
+    }
+
 }
