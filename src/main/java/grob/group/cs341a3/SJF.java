@@ -35,8 +35,8 @@ class SJF {
                 currentProcess.setTurnaroundTime(currentProcess.getWaitingTime() + currentProcess.getBurstTime());
                 turnaroundTime += currentProcess.getTurnaroundTime(); // sum of turnaround time
                 for (int i = 0; i < currentProcess.getBurstTime(); i++) {
-                    executionHistory.add(currentProcess.getName());
-                }
+                    executionHistory.add(currentProcess.getName());// for every time unit add the process name to the execution history
+                }                                                  // to save the execution sequence
                 currentTime += currentProcess.getBurstTime();
             } else {
                 executionHistory.add(readyQueue.getFirst().getName());

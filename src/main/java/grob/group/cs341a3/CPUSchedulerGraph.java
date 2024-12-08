@@ -94,7 +94,23 @@ public class CPUSchedulerGraph extends Application {
         gc.getCanvas().setHeight(yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset);
 
         // Adjust el canvas width dynamically 3la 7asb el execution history
-        gc.getCanvas().setWidth(executionHistory.size() * xScale);
+        gc.getCanvas().setWidth((executionHistory.size() + 1) * xScale);
+
+        // Draw grid lines
+        gc.setStroke(Color.LIGHTGRAY);
+        gc.setLineWidth(0.5);
+
+        // Vertical grid lines
+        for (int time = 1; time <= executionHistory.size(); time++) {
+            gc.strokeLine(time * xScale, 0, time * xScale, gc.getCanvas().getHeight());
+        }
+
+        // Horizontal grid lines
+        for (int i = 1; i <= uniqueProcesses.size(); i++) {
+            int y = yOffset + i * processYOffset;
+            gc.strokeLine(0, y, gc.getCanvas().getWidth(), y);
+        }
+
 
         // Draw el processes/events mn execution history
         for (int time = 0; time < executionHistory.size(); time++) {
@@ -120,11 +136,11 @@ public class CPUSchedulerGraph extends Application {
 
             // Draw el rectangle for el time unit
             gc.setFill(color);
-            gc.fillRect(time * xScale, y, xScale, barHeight);
+            gc.fillRect((time + 1) * xScale, y, xScale, barHeight);
 
             // Add el time label ta7t el rectangle
             gc.setFill(Color.BLACK);
-            gc.fillText(String.valueOf(time), time * xScale + 5, yOffset + uniqueProcesses.size() * processYOffset + barHeight);
+            gc.fillText(String.valueOf(time), (time + 1) * xScale + 5, yOffset + (uniqueProcesses.size()) * processYOffset + barHeight + 5);
         }
 
         // Draw Y-axis labels lel processes/events
@@ -138,14 +154,7 @@ public class CPUSchedulerGraph extends Application {
         // Draw X-axis (time) line ta7t el graph
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-        gc.strokeLine(0, yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset, executionHistory.size() * xScale, yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset);
+        gc.strokeLine(xScale, yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset, (executionHistory.size() + 1) * xScale, yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset);
 
-        // Draw time unit labels 3la X-axis
-        for (int time = 0; time < executionHistory.size(); time++) {
-            if (time % 5 == 0) {  // Add label kol 5 units
-                gc.setFill(Color.BLACK);
-                gc.fillText(String.valueOf(time), time * xScale + 5, yOffset + uniqueProcesses.size() * processYOffset + barHeight + timeAxisYOffset + 15);
-            }
-        }
     }
 }
