@@ -13,15 +13,15 @@ class Process {
     int priority;
     int remainingTime;
     double fcaiFactor;
-    int quantum;
+    double quantum;
     int waitingTime;
     int turnaroundTime;
-    List<Integer> quantumHistory;
+    List<Double> quantumHistory;
     int endTime;
     int remainingQuantum;
     boolean isComplete;
 
-    public Process(String name, int arrivalTime, int burstTime, int priority, int quantum, Color c) {
+    public Process(String name, int arrivalTime, int burstTime, int priority, double quantum, Color c) {
         this.name = name;
         this.arrivalTime = arrivalTime;
         this.burstTime = burstTime;
@@ -59,7 +59,7 @@ class Process {
         return remainingTime;
     }
 
-    public int getQuantum() {
+    public double getQuantum() {
         return quantum;
     }
 
@@ -79,22 +79,29 @@ class Process {
         return turnaroundTime;
     }
 
+    public double getFcaiFactor() {
+        return fcaiFactor;
+    }
+
     public void setTurnaroundTime(int turnaroundTime) {
         this.turnaroundTime = turnaroundTime;
     }
 
-    public double updateFcaiFactor(double V1, double V2) {
+    public void updateFcaiFactor(double V1, double V2) {
         System.out.println("FCAI Factor for " + name + ": " + (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2)));
-        fcaiFactor =  (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2));
-        return fcaiFactor;
+        this.fcaiFactor =  (double) ceil((10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2));
     }
 
-    public void updateQuantum(int newQuantum) {
-        if (remainingQuantum == 0) {
-            quantum = quantum + 2;
-        } else {
-            quantum = quantum + remainingQuantum;
-        }
+//    public void updateQuantum(double newQuantum) {
+//        if (remainingQuantum == 0) {
+//            quantum = quantum + 2;
+//        } else {
+//            quantum = quantum + remainingQuantum;
+//        }
+//        quantumHistory.add(quantum);
+//    }
+    public void updateQuantum(double newQuantum) {
+        quantum = newQuantum;
         quantumHistory.add(quantum);
     }
 
