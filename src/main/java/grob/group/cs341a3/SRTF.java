@@ -22,37 +22,34 @@ public class SRTF {
         Process currentProcess = null;
         List<String> executionHistory = new ArrayList<>();
 
-        // header
+        // Header
         System.out.println("\nProcesses\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time");
 
         while (completedProcesses < processes.size()) {
             Process nextProcess = null;
             int minRemainingTime = Integer.MAX_VALUE;
             boolean starvationOccurred = false;
+            Process starvedProcess = null;
 
             // Check for starvation
             for (Process p : processes) {
-                if (!p.isComplete && p.getArrivalTime() <= currentTime) { //lw elprocess makhlstsh w gya mn badry
-                    int waitingTime = currentTime - p.getArrivalTime() - (p.getBurstTime() - p.getRemainingTime()); //bahse elWT
-                    if (waitingTime > starvationThreshold) { //lw estanet aktar melthreshold yebaa de betmoot
+                if (!p.isComplete && p.getArrivalTime() <= currentTime) {
+                    int waitingTime = currentTime - p.getArrivalTime() - (p.getBurstTime() - p.getRemainingTime());
+                    if (waitingTime > starvationThreshold) {
                         starvationOccurred = true;
-                        break;
+                        if (starvedProcess == null || p.getArrivalTime() < starvedProcess.getArrivalTime()) {
+                            starvedProcess = p; // Pick the earliest-arriving starved process
+                        }
                     }
                 }
             }
 
             // Select the next process
-            for (Process p : processes) {
-                if (p.getArrivalTime() <= currentTime && !p.isComplete) { //baswitch lelprocess elba3dha
-                    if (!starvationOccurred) {
-                        // lw mafesh starvation bashtaghal STRF 3ady
-                        if (p.getRemainingTime() < minRemainingTime) {
-                            minRemainingTime = p.getRemainingTime();
-                            nextProcess = p;
-                        }
-                    } else {
-                        // lw feh babdaa addy priority lely betmoot elawal
-                        int priority = p.getWaitingTime() * p_factor;
+            if (starvationOccurred && starvedProcess != null) {
+                nextProcess = starvedProcess; // Override selection with the starved process
+            } else {
+                for (Process p : processes) {
+                    if (p.getArrivalTime() <= currentTime && !p.isComplete) {
                         if (p.getRemainingTime() < minRemainingTime) {
                             minRemainingTime = p.getRemainingTime();
                             nextProcess = p;
@@ -61,18 +58,18 @@ public class SRTF {
                 }
             }
 
-            // lelCS
-            if (nextProcess != currentProcess) { //lw baswitch
-                if (currentProcess != null && nextProcess != null) { //baswitch w msh idle
+            // Context Switching
+            if (nextProcess != currentProcess) {
+                if (currentProcess != null && nextProcess != null) {
                     for (int i = 0; i < contextSwitchingTime; i++) {
                         executionHistory.add("CS");
-                        currentTime++; //increment time
+                        currentTime++;
                     }
                 }
-                currentProcess = nextProcess; //baswitch
+                currentProcess = nextProcess;
             }
 
-            // lw CPU Idle
+            // CPU Idle
             if (currentProcess == null) {
                 executionHistory.add("Idle");
                 currentTime++;
@@ -84,7 +81,7 @@ public class SRTF {
             currentProcess.decrementRemainingTime();
             currentTime++;
 
-            // Mark process as complete if finished
+            // Mark process as complete
             if (currentProcess.getRemainingTime() == 0) {
                 currentProcess.setCompleted(true);
                 completedProcesses++;
@@ -92,7 +89,7 @@ public class SRTF {
             }
         }
 
-        // Calculate and display stats
+        // Calculate turnaround times and print stats
         findTurnAroundTime(processes);
         for (Process p : processes) {
             totalWaitingTime += p.getWaitingTime();
@@ -100,7 +97,7 @@ public class SRTF {
             System.out.println(p.getName() + "\t\t\t" + p.getBurstTime() + "\t\t\t" + p.getArrivalTime()
                     + "\t\t\t" + p.getWaitingTime() + "\t\t\t" + p.getTurnaroundTime());
         }
-        //elavgs
+
         float avgWT = (float) totalWaitingTime / processes.size();
         float avgTAT = (float) totalTurnaroundTime / processes.size();
 
@@ -112,7 +109,7 @@ public class SRTF {
             System.out.printf("Time %d: %s\n", i, executionHistory.get(i));
         }
 
-        // graph be class CPUScheduler
+        // Graph
         CPUSchedulerGraph.draw(executionHistory, (ArrayList<Process>) processes, avgWT, avgTAT);
     }
 }
