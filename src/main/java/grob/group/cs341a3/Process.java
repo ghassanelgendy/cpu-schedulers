@@ -79,13 +79,15 @@ class Process {
         return turnaroundTime;
     }
 
-    public double getFcaiFactor() {
-        return fcaiFactor;
-    }
+    public double getFcaiFactor() {return fcaiFactor;}
+
+    public int getPriority() {return priority;}
 
     public void setTurnaroundTime(int turnaroundTime) {
         this.turnaroundTime = turnaroundTime;
     }
+
+    public void setpriority(int priority) {this.priority = priority;}
 
     public void updateFcaiFactor(double V1, double V2) {
         System.out.println("FCAI Factor for " + name + ": " + (int) (ceil(10 - priority) + ceil(arrivalTime / V1) + ceil(remainingTime / V2)));

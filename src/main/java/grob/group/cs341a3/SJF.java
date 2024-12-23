@@ -3,6 +3,7 @@ package grob.group.cs341a3;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.paint.Color;
 
 class SJF {
     public static void schedule(int n, List<Process> processes, int CS) {
@@ -13,7 +14,23 @@ class SJF {
         processes.clear();// 3shan a3rf a-store el execution sequence
         int waitingTime = 0;// initialize waiting time 3shan a7sb el average
         int turnaroundTime = 0;// w nfs el kalam for the TAT
+
+
         while (!waitingQueue.isEmpty() || !readyQueue.isEmpty()) {
+
+            for (int i = 0; i < waitingQueue.size(); i++) {
+                waitingQueue.get(i).setpriority(waitingQueue.get(i).getBurstTime());
+                if(currentTime - waitingQueue.get(i).getArrivalTime() >= 10){
+                    waitingQueue.get(i).setpriority(-50);
+                }
+            }
+
+            for (int i = 0; i < readyQueue.size(); i++) {
+                readyQueue.get(i).setpriority(readyQueue.get(i).getBurstTime());
+                if(currentTime - readyQueue.get(i).getArrivalTime() >= 10){
+                    readyQueue.get(i).setpriority(-50);
+                }
+            }
 
             for (int i = 0; i < waitingQueue.size(); i++) {
                 if (waitingQueue.get(i).getArrivalTime() <= currentTime) {
@@ -25,7 +42,7 @@ class SJF {
             }
 
             // Sort ready queue by burst time
-            readyQueue.sort(Comparator.comparingInt(Process::getBurstTime));
+            readyQueue.sort(Comparator.comparingInt(Process::getPriority).thenComparingInt(Process::getArrivalTime));
 
             if (!readyQueue.isEmpty()) {
                 processes.add(readyQueue.getFirst()); // add the process to the execution sequence
@@ -39,7 +56,8 @@ class SJF {
                 }                                                  // to save the execution sequence
                 currentTime += currentProcess.getBurstTime();
             } else {
-                executionHistory.add(readyQueue.getFirst().getName());
+                processes.add(new Process("Idle", currentTime, 1, 0, 0, Color.BLACK));
+                executionHistory.add("Idle");
                 currentTime++;
             }
         }
