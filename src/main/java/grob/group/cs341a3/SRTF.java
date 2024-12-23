@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SRTF {
-    static final int p_factor = 5; // Priority factor lelstarvation
     static final int starvationThreshold = 10; // elprocess testana ad eh lehad maoul enha btestarve?
 
     // tat
@@ -27,7 +26,7 @@ public class SRTF {
 
         while (completedProcesses < processes.size()) {
             Process nextProcess = null;
-            int minRemainingTime = Integer.MAX_VALUE;
+            int minRemainingTime = 99999;
             boolean starvationOccurred = false;
             Process starvedProcess = null;
 
@@ -46,7 +45,7 @@ public class SRTF {
 
             // Select the next process
             if (starvationOccurred && starvedProcess != null) {
-                nextProcess = starvedProcess; // Override selection with the starved process
+                nextProcess = starvedProcess; // Override elprocees elgya belstarved process
             } else {
                 for (Process p : processes) {
                     if (p.getArrivalTime() <= currentTime && !p.isComplete) {
@@ -61,7 +60,7 @@ public class SRTF {
             // Context Switching
             if (nextProcess != currentProcess) {
                 if (currentProcess != null && nextProcess != null) {
-                    for (int i = 0; i < contextSwitchingTime; i++) {
+                    for (int j = 0; j < contextSwitchingTime; j++) {
                         executionHistory.add("CS");
                         currentTime++;
                     }
